@@ -1,0 +1,2 @@
+# geradorloto
+Gerador de sequência 
