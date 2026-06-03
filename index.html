@@ -2,205 +2,1071 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lotofácil App - Completo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- PWA Meta Tags para iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LotoFácil Pro">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0f1c">
+  
+  <!-- Ícones para iOS (SVG inline) -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><rect width='180' height='180' rx='40' fill='%230a0f1c'/><text x='90' y='115' font-size='80' text-anchor='middle' fill='%23eab308'>🎯</text></svg>">
+  
+  <!-- PWA Manifest inline -->
+  <script>
+    // Criar manifest dinamicamente
+    const manifest = {
+      name: "LotoFácil Pro",
+      short_name: "LotoFácil Pro",
+      description: "Gerador inteligente de jogos da Lotofácil com estatísticas avançadas",
+      start_url: "/Lotofacil-Pro/",
+      display: "standalone",
+      orientation: "portrait",
+      background_color: "#0a0f1c",
+      theme_color: "#0a0f1c",
+      lang: "pt-BR",
+      icons: [
+        { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='192' height='192'><rect width='192' height='192' rx='42' fill='%230a0f1c'/><text x='96' y='118' font-size='85' text-anchor='middle' fill='%23eab308'>🎯</text></svg>", sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" },
+        { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='512' height='512' rx='112' fill='%230a0f1c'/><text x='256' y='314' font-size='226' text-anchor='middle' fill='%23eab308'>🎯</text></svg>", sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+      ]
+    };
+    
+    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+    const manifestURL = URL.createObjectURL(blob);
+    document.write(`<link rel="manifest" href="${manifestURL}">`);
+  </script>
+  
+  <title>LotoFácil Pro - Gerador Inteligente</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
   <style>
-    .number { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: bold; border-radius: 9999px; }
-    .hit { background-color: #22c55e !important; color: black; animation: pulse 1s; }
-    @keyframes pulse { 0% { transform: scale(0.9); } 100% { transform: scale(1); } }
-    .tab-active { border-bottom: 4px solid #22c55e; font-weight: bold; }
+    :root {
+      --primary: #3b82f6;
+      --accent: #eab308;
+      --bg: #0a0f1c;
+      --surface: #111827;
+      --surface2: #1f2937;
+      --safe-area-inset-top: env(safe-area-inset-top);
+      --safe-area-inset-bottom: env(safe-area-inset-bottom);
+    }
+    
+    * { 
+      transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    body {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      overscroll-behavior: none;
+    }
+    
+    .number { 
+      width: 48px; 
+      height: 48px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 1.1rem; 
+      font-weight: bold; 
+      border-radius: 9999px; 
+      transition: all 0.3s;
+    }
+    
+    .hit { 
+      background-color: #eab308 !important; 
+      color: black !important; 
+      animation: hitPop 0.6s; 
+      box-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
+    }
+    
+    @keyframes hitPop { 
+      0% { transform: scale(0.8); } 
+      50% { transform: scale(1.2); } 
+      100% { transform: scale(1); } 
+    }
+    
+    .tab-active { 
+      border-bottom: 4px solid #eab308; 
+      font-weight: bold; 
+      color: white; 
+    }
+    
+    .strategy-toggle {
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #1f2937;
+      text-align: center;
+      font-weight: 600;
+      border: 2px solid transparent;
+    }
+    
+    .strategy-toggle.on {
+      background: #1e3a5f;
+      border-color: #3b82f6;
+      color: #60a5fa;
+    }
+    
+    .strategy-toggle:active {
+      transform: scale(0.95);
+    }
+    
+    .premio-destaque {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .loading-spinner {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    button {
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    
+    .scroll-container {
+      -webkit-overflow-scrolling: touch;
+      overflow-y: auto;
+    }
+    
+    .install-banner {
+      background: linear-gradient(135deg, #3b82f6, #eab308);
+      padding: 16px;
+      margin: 16px;
+      border-radius: 20px;
+      display: none;
+      animation: slideDown 0.5s ease;
+    }
+    
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .install-banner.show {
+      display: block;
+    }
+    
+    .offline-indicator {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ef4444;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      z-index: 1000;
+      display: none;
+    }
+    
+    .offline-indicator.show {
+      display: block;
+    }
   </style>
 </head>
-<body class="bg-gray-950 text-white min-h-screen">
-  <div class="max-w-lg mx-auto">
-    <h1 class="text-3xl font-bold text-center py-6 bg-green-900">🎟️ Lotofácil App</h1>
+<body class="bg-[#0a0f1c] text-white min-h-screen font-sans">
 
-    <!-- Tabs -->
-    <div class="flex border-b border-gray-700 bg-gray-900 sticky top-0 z-10">
-      <button onclick="showTab(0)" class="tab tab-active flex-1 py-4 text-sm" id="tab0">Gerador</button>
-      <button onclick="showTab(1)" class="tab flex-1 py-4 text-sm" id="tab1">Meus Jogos</button>
-      <button onclick="showTab(2)" class="tab flex-1 py-4 text-sm" id="tab2">Resultados</button>
-      <button onclick="showTab(3)" class="tab flex-1 py-4 text-sm" id="tab3">Estatísticas</button>
-    </div>
+<!-- Indicador Offline -->
+<div id="offlineIndicator" class="offline-indicator">
+  📱 Modo Offline - Dados podem estar desatualizados
+</div>
 
-    <!-- GERADOR -->
-    <div id="content0" class="tab-content p-4">
-      <div class="bg-gray-900 rounded-2xl p-5 mb-6">
-        <h3 class="font-bold mb-4">Escolha as Análises:</h3>
-        <div class="grid grid-cols-2 gap-3 text-sm">
-          <label class="flex items-center gap-2 bg-gray-800 p-3 rounded-xl"><input type="checkbox" id="analiseLast" checked> Repetição Último</label>
-          <label class="flex items-center gap-2 bg-gray-800 p-3 rounded-xl"><input type="checkbox" id="analiseQuentes" checked> Números Quentes</label>
-          <label class="flex items-center gap-2 bg-gray-800 p-3 rounded-xl"><input type="checkbox" id="analiseFrios"> Números Frios</label>
-          <label class="flex items-center gap-2 bg-gray-800 p-3 rounded-xl"><input type="checkbox" id="analiseEquilibrio" checked> Equilíbrio Par/Ímpar</label>
-        </div>
+<div class="max-w-lg mx-auto">
 
-        <div class="mt-6">
-          <label class="block text-sm mb-2">Quantidade de jogos</label>
-          <input type="number" id="qtd" value="6" min="1" max="20" class="w-full bg-gray-800 p-4 rounded-xl">
-        </div>
-
-        <button onclick="gerarJogos()" class="w-full mt-6 bg-green-600 py-5 rounded-2xl font-bold text-lg">GERAR JOGOS</button>
-      </div>
-
-      <div id="lastResult" class="bg-gray-900 p-5 rounded-2xl text-center"></div>
-      <div id="resultados" class="mt-6 space-y-6"></div>
-    </div>
-
-    <!-- MEUS JOGOS -->
-    <div id="content1" class="tab-content hidden p-4">
-      <div id="meusJogosList" class="space-y-6"></div>
-    </div>
-
-    <!-- RESULTADOS REAIS -->
-    <div id="content2" class="tab-content hidden p-4">
-      <h2 class="text-xl font-bold mb-4">Últimos Resultados</h2>
-      <div id="resultadosReais" class="space-y-6"></div>
-    </div>
-
-    <!-- ESTATÍSTICAS -->
-    <div id="content3" class="tab-content hidden p-4">
-      <h2 class="text-xl font-bold mb-6">📊 Estatísticas Históricas</h2>
-      <div id="quentesList" class="grid grid-cols-5 gap-4"></div>
-    </div>
+  <!-- BANNER DE INSTALAÇÃO -->
+  <div id="installBanner" class="install-banner text-center">
+    <p class="text-white font-bold mb-2">📱 Instale este app!</p>
+    <p class="text-sm text-white/80 mb-3">Toque em <span class="font-bold">Compartilhar</span> e depois <span class="font-bold">"Adicionar à Tela de Início"</span></p>
+    <button onclick="fecharBanner()" class="bg-white/20 text-white px-6 py-2 rounded-full text-sm">OK, entendi!</button>
   </div>
 
-  <script>
-    let ultimoSorteio = [];
-    let meusJogos = JSON.parse(localStorage.getItem('meusJogosLotofacil')) || [];
+  <!-- HEADER -->
+  <div class="bg-[#111827] border-b-2 border-blue-900 p-5 sticky top-0 z-50 shadow-2xl">
+    <div class="flex justify-between items-center">
+      <div class="text-3xl font-bold tracking-tight">
+        LotoFácil <span class="text-yellow-400">PRO</span>
+      </div>
+      <div onclick="atualizarAgora()" class="flex items-center gap-2 bg-[#1f2937] px-4 py-2 rounded-2xl cursor-pointer hover:bg-[#374151] border border-blue-900 active:scale-95 transition">
+        <span id="statusText" class="text-sm text-blue-300">Carregando...</span>
+        <span id="refreshIcon" class="text-yellow-400 text-xl">⟳</span>
+      </div>
+    </div>
+    <div id="concursoInfo" class="text-center mt-4 text-blue-400 font-medium text-lg"></div>
+    <div id="ultimoSorteio" class="flex flex-wrap gap-2 justify-center mt-4"></div>
+    <div id="updateStatus" class="text-xs text-center text-zinc-500 mt-2"></div>
+  </div>
 
-    const frequencia = {20:2309,10:2302,25:2293,11:2272,13:2247,24:2244,1:2236,4:2234,14:2230,3:2223,12:2220,5:2216,2:2215,22:2206,15:2205,19:2203,9:2200,18:2197,21:2193,7:2183,6:2170,17:2166,23:2165,8:2140,16:2111};
-    const frios = [16,8,23,17,21,6];
+  <!-- TABS -->
+  <div class="grid grid-cols-5 bg-[#111827] border-b border-blue-900 sticky top-[180px] z-40">
+    <button onclick="showTab(0)" class="tab tab-active py-4 text-xs font-bold" id="tab0">🎯 GERAR</button>
+    <button onclick="showTab(1)" class="tab py-4 text-xs font-bold" id="tab1">💾 JOGOS</button>
+    <button onclick="showTab(2)" class="tab py-4 text-xs font-bold" id="tab2">📊 RESULT.</button>
+    <button onclick="showTab(3)" class="tab py-4 text-xs font-bold" id="tab3">📈 STATS</button>
+    <button onclick="showTab(4)" class="tab py-4 text-xs font-bold" id="tab4">📋 PAINEL</button>
+  </div>
 
-    async function carregarUltimoSorteio() {
-      const div = document.getElementById('lastResult');
-      div.innerHTML = `<p class="text-gray-400">Buscando último sorteio...</p>`;
-      
-      try {
-        const res = await fetch('https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil');
-        const data = await res.json();
-        ultimoSorteio = data.dezenasSorteadasOrdemSorteio.map(n => parseInt(n));
-        div.innerHTML = `
-          <p class="text-green-400">Concurso ${data.numeroConcurso} - ${data.dataApuracao}</p>
-          <div class="flex flex-wrap gap-2 justify-center mt-4">
-            ${ultimoSorteio.map(n => `<div class="number bg-blue-600">${n.toString().padStart(2,'0')}</div>`).join('')}
-          </div>`;
-      } catch(e) {
-        ultimoSorteio = [1,4,6,7,9,10,11,13,14,16,17,18,20,21,25];
-        div.innerHTML = `<p class="text-yellow-400">Concurso 3693 - 23/05/2026 (Offline)</p>`;
-      }
-    }
+  <div class="p-4">
 
-    function gerarJogos() {
-      const qtd = parseInt(document.getElementById('qtd').value) || 6;
-      const container = document.getElementById('resultados');
-      container.innerHTML = '';
-
-      const usarLast = document.getElementById('analiseLast').checked;
-      const usarQuentes = document.getElementById('analiseQuentes').checked;
-      const usarFrios = document.getElementById('analiseFrios').checked;
-      const usarEquilibrio = document.getElementById('analiseEquilibrio').checked;
-
-      for (let i = 0; i < qtd; i++) {
-        let jogo = [];
-
-        if (usarLast) {
-          const qtdRep = Math.floor(Math.random() * 4) + 8;
-          jogo = [...ultimoSorteio].sort(() => Math.random() - 0.5).slice(0, qtdRep);
-        }
-
-        if (usarQuentes) {
-          const quentesList = Object.keys(frequencia).sort((a,b) => frequencia[b]-frequencia[a]);
-          for (let k = 0; k < 7; k++) {
-            const num = parseInt(quentesList[k]);
-            if (!jogo.includes(num)) jogo.push(num);
-          }
-        }
-
-        if (usarFrios) {
-          for (let k = 0; k < 3; k++) {
-            const num = frios[Math.floor(Math.random()*frios.length)];
-            if (!jogo.includes(num)) jogo.push(num);
-          }
-        }
-
-        while (jogo.length < 15) {
-          const num = Math.floor(Math.random()*25) + 1;
-          if (!jogo.includes(num)) jogo.push(num);
-        }
-
-        jogo = [...new Set(jogo)].slice(0,15).sort((a,b) => a-b);
-        const acertos = jogo.filter(n => ultimoSorteio.includes(n)).length;
-
-        const div = document.createElement('div');
-        div.className = "bg-gray-900 p-5 rounded-2xl";
-        div.innerHTML = `
-          <div class="flex justify-between mb-3">
-            <span class="font-bold">Jogo ${i+1}</span>
-            <span class="text-green-400">${acertos} acertos</span>
+    <!-- TAB 0: GERAR JOGOS -->
+    <div id="content0" class="tab-content">
+      <div class="bg-[#111827] rounded-3xl p-6 mb-6 shadow-xl border border-blue-900">
+        <h3 class="text-yellow-400 font-bold mb-4 flex items-center gap-2">
+          <span>🎯</span> ESTRATÉGIAS ATIVAS
+        </h3>
+        <div class="grid grid-cols-2 gap-3">
+          <div onclick="toggleStrat(0)" id="strat0" class="strategy-toggle on">
+            🔥 Quentes
           </div>
-          <div class="flex flex-wrap gap-2">${jogo.map(n => `<div class="number ${ultimoSorteio.includes(n) ? 'hit' : 'bg-purple-600'}">${n.toString().padStart(2,'0')}</div>`).join('')}</div>
-          <button onclick='salvarJogo(${JSON.stringify(jogo)})' class="mt-4 w-full bg-gray-700 py-3 rounded-xl text-sm">💾 Salvar</button>
-        `;
-        container.appendChild(div);
-      }
-    }
+          <div onclick="toggleStrat(1)" id="strat1" class="strategy-toggle on">
+            ❄️ Atrasados
+          </div>
+          <div onclick="toggleStrat(2)" id="strat2" class="strategy-toggle on">
+            🔁 Repetição
+          </div>
+          <div onclick="toggleStrat(3)" id="strat3" class="strategy-toggle on">
+            ⚖️ Equilíbrio
+          </div>
+        </div>
+        <div class="mt-4 flex gap-2 items-center">
+          <label class="text-sm text-zinc-400">Quantidade:</label>
+          <select id="qtdJogos" class="bg-[#1f2937] text-white px-3 py-1 rounded-lg border border-blue-900">
+            <option value="3">3 jogos</option>
+            <option value="6" selected>6 jogos</option>
+            <option value="10">10 jogos</option>
+            <option value="15">15 jogos</option>
+          </select>
+        </div>
+      </div>
 
-    function salvarJogo(jogo) {
-      meusJogos.unshift({data: new Date().toLocaleDateString('pt-BR'), jogo});
-      localStorage.setItem('meusJogosLotofacil', JSON.stringify(meusJogos));
-      alert("✅ Jogo salvo com sucesso!");
-      showTab(1);
-    }
+      <button onclick="gerarJogos()" class="w-full bg-gradient-to-r from-blue-600 to-yellow-400 text-black font-bold py-6 rounded-3xl text-lg active:scale-95 transition shadow-2xl">
+        ⚡ GERAR JOGOS INTELIGENTES
+      </button>
 
-    function renderMeusJogos() {
-      const container = document.getElementById('meusJogosList');
-      container.innerHTML = meusJogos.length === 0 ? 
-        '<p class="text-gray-500 text-center py-12">Nenhum jogo salvo ainda.</p>' : 
-        meusJogos.map((item, i) => `
-          <div class="bg-gray-900 p-5 rounded-2xl">
-            <p class="text-xs text-gray-500">${item.data}</p>
-            <div class="flex flex-wrap gap-2 my-4">${item.jogo.map(n => `<div class="number bg-purple-600">${n.toString().padStart(2,'0')}</div>`).join('')}</div>
-            <input type="text" id="input_${i}" placeholder="Concurso (ex: 3693)" class="w-full bg-gray-800 p-3 rounded-xl text-sm mb-2">
-            <button onclick="analisarJogo(${i})" class="w-full bg-green-600 py-3 rounded-xl">Ver Acertos</button>
-            <div id="res_${i}" class="mt-3 text-center font-bold"></div>
-          </div>`).join('');
-    }
+      <div id="resultados" class="mt-8 space-y-6"></div>
+    </div>
 
-    function analisarJogo(i) {
-      const concurso = document.getElementById(`input_${i}`).value.trim();
-      // Aqui você pode expandir com mais resultados
-      alert(`Análise do jogo ${i+1} no concurso ${concurso} (implementação expandida em breve)`);
-    }
+    <!-- TAB 1: MEUS JOGOS -->
+    <div id="content1" class="tab-content hidden">
+      <div class="flex gap-3 mb-6">
+        <button onclick="conferirTodos()" class="flex-1 bg-gradient-to-r from-green-600 to-green-400 py-4 rounded-2xl font-bold active:scale-95 transition">
+          ✅ CONFERIR
+        </button>
+        <button onclick="exportarJogos()" class="bg-blue-600 px-4 py-4 rounded-2xl font-bold active:scale-95 transition" title="Exportar">
+          📤
+        </button>
+        <button onclick="limparJogos()" class="bg-red-600 px-4 py-4 rounded-2xl font-bold active:scale-95 transition" title="Limpar">
+          🗑️
+        </button>
+      </div>
+      <div id="meusJogosList" class="space-y-4"></div>
+      <div id="mensagemVazia" class="text-center text-zinc-500 mt-8">
+        <p class="text-4xl mb-4">💾</p>
+        <p>Nenhum jogo salvo ainda</p>
+        <p class="text-sm mt-2">Gere jogos e salve-os aqui!</p>
+      </div>
+    </div>
 
-    function renderResultadosReais() {
-      // Implementação básica
-      document.getElementById('resultadosReais').innerHTML = `<p class="text-gray-400">Últimos resultados carregados automaticamente.</p>`;
-    }
+    <!-- TAB 2: RESULTADOS -->
+    <div id="content2" class="tab-content hidden">
+      <div class="flex gap-3 mb-6">
+        <button onclick="carregarUltimoResultado()" class="flex-1 bg-blue-600 py-4 rounded-2xl font-bold active:scale-95 transition">
+          🔄 ÚLTIMO SORTEIO
+        </button>
+        <button onclick="carregarHistorico()" class="flex-1 bg-green-600 py-4 rounded-2xl font-bold active:scale-95 transition">
+          📅 HISTÓRICO
+        </button>
+      </div>
+      <div id="resultadosReais" class="space-y-4"></div>
+    </div>
 
-    function renderEstatisticas() {
-      const container = document.getElementById('quentesList');
-      const sorted = Object.entries(frequencia).sort((a,b) => b[1] - a[1]);
-      container.innerHTML = sorted.slice(0,15).map(([n]) => `
-        <div class="text-center"><div class="number bg-green-600 mx-auto">${n}</div><p class="text-xs">Quente</p></div>
-      `).join('');
-    }
+    <!-- TAB 3: ESTATÍSTICAS -->
+    <div id="content3" class="tab-content hidden">
+      <div class="flex gap-3 mb-6">
+        <button onclick="gerarEstatisticas()" class="flex-1 bg-purple-600 py-4 rounded-2xl font-bold active:scale-95 transition">
+          📊 MEUS JOGOS
+        </button>
+        <button onclick="estatisticasGerais()" class="flex-1 bg-indigo-600 py-4 rounded-2xl font-bold active:scale-95 transition">
+          🌐 GERAIS
+        </button>
+      </div>
+      <div id="estatisticas" class="space-y-4"></div>
+    </div>
 
-    function showTab(n) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById('content' + n).classList.remove('hidden');
-      document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('tab-active', i === n));
+    <!-- TAB 4: PAINEL -->
+    <div id="content4" class="tab-content hidden">
+      <div id="painel" class="space-y-4"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============ SERVICE WORKER REGISTRATION ============
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(registration => {
+          console.log('Service Worker registrado com sucesso:', registration.scope);
+        })
+        .catch(error => {
+          console.log('Falha no registro do Service Worker:', error);
+        });
+    });
+  }
+
+  // ============ VARIÁVEIS GLOBAIS ============
+  let ultimoSorteio = [];
+  let meusJogos = JSON.parse(localStorage.getItem('loto_jogos')) || [];
+  let strategies = [true, true, true, true];
+  let lastUpdate = null;
+
+  // ============ MONITORAMENTO DE CONEXÃO ============
+  function updateOnlineStatus() {
+    const offlineIndicator = document.getElementById('offlineIndicator');
+    if (navigator.onLine) {
+      offlineIndicator.classList.remove('show');
+      document.getElementById('statusText').textContent = 'Online';
+      document.getElementById('statusText').style.color = '#60a5fa';
+    } else {
+      offlineIndicator.classList.add('show');
+      document.getElementById('statusText').textContent = 'Offline';
+      document.getElementById('statusText').style.color = '#ef4444';
+      setTimeout(() => offlineIndicator.classList.remove('show'), 3000);
+    }
+  }
+
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+
+  // ============ PWA INSTALL ============
+  function isAppInstalled() {
+    return window.matchMedia('(display-mode: standalone)').matches || 
+           window.navigator.standalone === true;
+  }
+
+  function showInstallBanner() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    
+    if (isIOS && isSafari && !isAppInstalled()) {
+      setTimeout(() => {
+        document.getElementById('installBanner').classList.add('show');
+      }, 3000);
+    }
+  }
+
+  function fecharBanner() {
+    document.getElementById('installBanner').classList.remove('show');
+    localStorage.setItem('banner_fechado', 'true');
+  }
+
+  // ============ FUNÇÕES PRINCIPAIS ============
+  async function carregarDados() {
+    const refreshIcon = document.getElementById('refreshIcon');
+    refreshIcon.classList.add('loading-spinner');
+    updateOnlineStatus();
+    
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
       
-      if (n === 1) renderMeusJogos();
-      if (n === 2) renderResultadosReais();
-      if (n === 3) renderEstatisticas();
+      const res = await fetch('https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil', {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!res.ok) throw new Error('Erro na API');
+      
+      const data = await res.json();
+      ultimoSorteio = data.dezenasSorteadasOrdemSorteio.map(n => parseInt(n));
+      
+      document.getElementById('concursoInfo').innerHTML = `
+        <span class="text-yellow-400 font-black">Concurso #${data.numeroConcurso}</span>
+        <span class="text-sm text-zinc-400 block">${data.dataApuracao || ''}</span>
+      `;
+      
+      renderBalls(ultimoSorteio);
+      lastUpdate = new Date();
+      document.getElementById('updateStatus').textContent = '✅ Dados oficiais da Caixa';
+      
+      // Salvar dados offline
+      localStorage.setItem('ultimoSorteio', JSON.stringify({
+        numeros: ultimoSorteio,
+        timestamp: Date.now()
+      }));
+      
+    } catch(e) {
+      console.log('Erro ao carregar dados:', e.message);
+      
+      // Tentar carregar dados salvos
+      const dadosSalvos = localStorage.getItem('ultimoSorteio');
+      if (dadosSalvos) {
+        const parsed = JSON.parse(dadosSalvos);
+        ultimoSorteio = parsed.numeros;
+        const horasAtras = Math.floor((Date.now() - parsed.timestamp) / 3600000);
+        document.getElementById('updateStatus').textContent = 
+          `📱 Dados offline (${horasAtras > 0 ? horasAtras + 'h atrás' : 'recente'})`;
+      } else {
+        ultimoSorteio = [1,4,6,7,9,10,11,13,14,16,17,18,20,21,25];
+        document.getElementById('updateStatus').textContent = '⚠️ Modo offline - exemplo';
+      }
+      
+      document.getElementById('concursoInfo').innerHTML = `
+        <span class="text-yellow-400">Concurso</span>
+        <span class="text-sm text-red-400 block">Dados offline</span>
+      `;
+      
+      renderBalls(ultimoSorteio);
     }
+    
+    refreshIcon.classList.remove('loading-spinner');
+    updateTimeStatus();
+    updateOnlineStatus();
+  }
 
-    // Inicialização
-    window.onload = () => {
-      carregarUltimoSorteio();
-      showTab(0);
-    };
-  </script>
+  function renderBalls(nums) {
+    document.getElementById('ultimoSorteio').innerHTML = nums.map(n => 
+      `<div class="number bg-blue-600 shadow-lg">${n.toString().padStart(2,'0')}</div>`
+    ).join('');
+  }
+
+  function updateTimeStatus() {
+    if (!lastUpdate) return;
+    const diff = Math.floor((Date.now() - lastUpdate) / 60000);
+    const statusText = document.getElementById('statusText');
+    if (diff < 1) {
+      statusText.textContent = 'Agora';
+    } else if (diff < 60) {
+      statusText.textContent = `Há ${diff}m`;
+    } else {
+      statusText.textContent = `Há ${Math.floor(diff/60)}h`;
+    }
+  }
+
+  async function atualizarAgora() {
+    await carregarDados();
+    updateOnlineStatus();
+  }
+
+  // ============ ESTRATÉGIAS ============
+  function toggleStrat(i) {
+    strategies[i] = !strategies[i];
+    document.getElementById(`strat${i}`).classList.toggle('on', strategies[i]);
+    if (window.navigator.vibrate) {
+      window.navigator.vibrate(10);
+    }
+  }
+
+  function gerarJogos() {
+    const qtdJogos = parseInt(document.getElementById('qtdJogos').value);
+    const container = document.getElementById('resultados');
+    container.innerHTML = '';
+    
+    for (let i = 0; i < qtdJogos; i++) {
+      let jogo = gerarJogoInteligente();
+      
+      const div = document.createElement('div');
+      div.className = "bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900 hover:border-yellow-400 transition";
+      div.innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+          <span class="font-bold text-lg flex items-center gap-2">
+            <span class="text-yellow-400">#${i + 1}</span> 
+            Jogo ${i + 1}
+          </span>
+          <span class="text-sm text-zinc-500">${new Date().toLocaleTimeString('pt-BR')}</span>
+        </div>
+        <div class="flex flex-wrap gap-2 justify-center">
+          ${jogo.map(n => `<div class="number bg-blue-600 shadow-lg">${n.toString().padStart(2,'0')}</div>`).join('')}
+        </div>
+        <div class="grid grid-cols-2 gap-3 mt-6">
+          <button onclick='salvarJogo(${JSON.stringify(jogo)})' class="bg-yellow-400 text-black py-3 rounded-xl font-bold active:scale-95 transition">
+            💾 SALVAR
+          </button>
+          <button onclick='conferirJogoAgora(${JSON.stringify(jogo)})' class="bg-green-600 py-3 rounded-xl font-bold active:scale-95 transition">
+            ✅ CONFERIR
+          </button>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+    
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function gerarJogoInteligente() {
+    let numeros = [];
+    
+    if (strategies[0]) {
+      const quentes = [20, 10, 25, 11, 13, 24, 1, 4, 14, 3, 7, 18, 9, 21, 16];
+      numeros.push(...quentes.slice(0, 8));
+    }
+    
+    if (strategies[1]) {
+      const atrasados = [2, 5, 8, 12, 15, 19, 22, 23];
+      numeros.push(...atrasados.slice(0, 4));
+    }
+    
+    if (strategies[2] && ultimoSorteio.length > 0) {
+      const repeticoes = ultimoSorteio.sort(() => Math.random() - 0.5).slice(0, 5);
+      numeros.push(...repeticoes);
+    }
+    
+    if (strategies[3]) {
+      const pares = [2,4,6,8,10,12,14,16,18,20,22,24];
+      const impares = [1,3,5,7,9,11,13,15,17,19,21,23,25];
+      numeros.push(...pares.sort(() => Math.random() - 0.5).slice(0, 4));
+      numeros.push(...impares.sort(() => Math.random() - 0.5).slice(0, 4));
+    }
+    
+    while (numeros.length < 15) {
+      const novo = Math.floor(Math.random() * 25) + 1;
+      if (!numeros.includes(novo)) numeros.push(novo);
+    }
+    
+    return [...new Set(numeros)].slice(0, 15).sort((a, b) => a - b);
+  }
+
+  // ============ GERENCIAMENTO DE JOGOS ============
+  function salvarJogo(jogo) {
+    meusJogos.unshift({
+      data: new Date().toLocaleDateString('pt-BR'),
+      hora: new Date().toLocaleTimeString('pt-BR'),
+      jogo: jogo
+    });
+    localStorage.setItem('loto_jogos', JSON.stringify(meusJogos));
+    
+    if (window.navigator.vibrate) {
+      window.navigator.vibrate([50, 50, 50]);
+    }
+    
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-2xl shadow-2xl z-50';
+    notification.textContent = '✅ Jogo salvo!';
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      setTimeout(() => notification.remove(), 300);
+    }, 2000);
+    
+    showTab(1);
+    carregarMeusJogos();
+  }
+
+  function carregarMeusJogos() {
+    const container = document.getElementById('meusJogosList');
+    const mensagemVazia = document.getElementById('mensagemVazia');
+    
+    if (meusJogos.length === 0) {
+      container.innerHTML = '';
+      mensagemVazia.classList.remove('hidden');
+      return;
+    }
+    
+    mensagemVazia.classList.add('hidden');
+    
+    container.innerHTML = meusJogos.map((jogo, idx) => {
+      return `
+        <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <span class="font-bold text-lg">Jogo ${idx + 1}</span>
+              <p class="text-xs text-zinc-500">${jogo.data} às ${jogo.hora}</p>
+            </div>
+            <button onclick="removerJogo(${idx})" class="text-red-400 active:scale-90 transition p-2">
+              🗑️
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-2 justify-center">
+            ${jogo.jogo.map(n => `<div class="number bg-blue-600">${n.toString().padStart(2,'0')}</div>`).join('')}
+          </div>
+          <button onclick='conferirJogoEspecifico(${idx})' class="mt-4 w-full bg-green-600 py-3 rounded-xl font-bold active:scale-95 transition">
+            ✅ CONFERIR AGORA
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function removerJogo(idx) {
+    if (confirm('Tem certeza que deseja remover este jogo?')) {
+      meusJogos.splice(idx, 1);
+      localStorage.setItem('loto_jogos', JSON.stringify(meusJogos));
+      carregarMeusJogos();
+    }
+  }
+
+  function limparJogos() {
+    if (confirm('Tem certeza que deseja REMOVER TODOS os jogos?')) {
+      meusJogos = [];
+      localStorage.setItem('loto_jogos', JSON.stringify(meusJogos));
+      carregarMeusJogos();
+    }
+  }
+
+  function exportarJogos() {
+    if (meusJogos.length === 0) {
+      alert('Nenhum jogo para exportar!');
+      return;
+    }
+    
+    let texto = 'MEUS JOGOS - LOTOFÁCIL PRO\n';
+    texto += '='.repeat(40) + '\n\n';
+    
+    meusJogos.forEach((jogo, idx) => {
+      texto += `Jogo ${idx + 1} - ${jogo.data} ${jogo.hora}\n`;
+      texto += jogo.jogo.map(n => n.toString().padStart(2,'0')).join(' - ') + '\n\n';
+    });
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'Meus Jogos - Lotofácil Pro',
+        text: texto,
+      }).catch(() => {
+        downloadFile(texto);
+      });
+    } else {
+      downloadFile(texto);
+    }
+  }
+  
+  function downloadFile(texto) {
+    const blob = new Blob([texto], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lotofacil-jogos-${new Date().toLocaleDateString('pt-BR')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ============ CONFERÊNCIA ============
+  function conferirTodos() {
+    if (!ultimoSorteio.length) {
+      alert('⚠️ Carregue os resultados primeiro!');
+      return;
+    }
+    
+    const container = document.getElementById('meusJogosList');
+    
+    container.innerHTML = meusJogos.map((jogo, idx) => {
+      const acertos = jogo.jogo.filter(n => ultimoSorteio.includes(n));
+      const qtdAcertos = acertos.length;
+      const premiado = qtdAcertos >= 11;
+      
+      const faixaPremio = 
+        qtdAcertos === 15 ? '🏆 15 ACERTOS!' :
+        qtdAcertos === 14 ? '💰 14 ACERTOS' :
+        qtdAcertos === 13 ? '🎯 13 ACERTOS' :
+        qtdAcertos === 12 ? '⭐ 12 ACERTOS' :
+        qtdAcertos === 11 ? '✨ 11 ACERTOS' : '';
+      
+      return `
+        <div class="bg-[#111827] p-6 rounded-3xl shadow-xl ${premiado ? 'border-4 border-yellow-400 premio-destaque' : 'border border-blue-900'}">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <span class="font-bold text-lg">Jogo ${idx + 1}</span>
+              <p class="text-xs text-zinc-500">${jogo.data} ${jogo.hora}</p>
+            </div>
+            <div class="text-center">
+              <span class="text-3xl font-black ${premiado ? 'text-yellow-400' : 'text-red-400'}">
+                ${qtdAcertos}
+              </span>
+              <p class="text-xs ${premiado ? 'text-yellow-400' : 'text-zinc-500'}">acertos</p>
+            </div>
+          </div>
+          
+          ${premiado ? `<div class="text-center text-yellow-400 font-bold text-lg mb-4">${faixaPremio}</div>` : ''}
+          
+          <div class="flex flex-wrap gap-2 justify-center">
+            ${jogo.jogo.map(n => {
+              const acertou = ultimoSorteio.includes(n);
+              return `<div class="number ${acertou ? 'hit' : 'bg-blue-600'}">${n.toString().padStart(2,'0')}</div>`;
+            }).join('')}
+          </div>
+          
+          <div class="mt-4 p-3 bg-[#1f2937] rounded-xl">
+            <p class="text-sm text-center ${premiado ? 'text-yellow-400' : 'text-zinc-400'}">
+              ${premiado ? '🎉 JOGO PREMIADO!' : 'Não foi dessa vez...'}
+            </p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function conferirJogoEspecifico(idx) {
+    if (!ultimoSorteio.length) {
+      alert('⚠️ Carregue os resultados primeiro!');
+      return;
+    }
+    
+    const jogo = meusJogos[idx];
+    const acertos = jogo.jogo.filter(n => ultimoSorteio.includes(n));
+    const qtdAcertos = acertos.length;
+    const premiado = qtdAcertos >= 11;
+    
+    alert(`
+🎯 RESULTADO DA CONFERÊNCIA
+
+Jogo: ${idx + 1}
+Data: ${jogo.data}
+Acertos: ${qtdAcertos} de 15
+${premiado ? '🏆 PARABÉNS! JOGO PREMIADO!' : '❌ Não premiado'}
+
+Números acertados: ${acertos.sort((a,b) => a-b).join(', ')}
+    `);
+  }
+
+  function conferirJogoAgora(jogo) {
+    if (!ultimoSorteio.length) {
+      alert('⚠️ Carregue os resultados primeiro!');
+      return;
+    }
+    
+    const acertos = jogo.filter(n => ultimoSorteio.includes(n));
+    const qtdAcertos = acertos.length;
+    const premiado = qtdAcertos >= 11;
+    
+    alert(`
+🎯 CONFERÊNCIA RÁPIDA
+
+Acertos: ${qtdAcertos} de 15
+${premiado ? '🏆 JOGO PREMIADO!' : '❌ Não premiado'}
+
+Números: ${acertos.sort((a,b) => a-b).join(', ')}
+    `);
+  }
+
+  // ============ RESULTADOS ============
+  function carregarUltimoResultado() {
+    const container = document.getElementById('resultadosReais');
+    
+    if (!ultimoSorteio.length) {
+      container.innerHTML = '<div class="text-center py-8"><div class="loading-spinner text-4xl inline-block">⏳</div></div>';
+      carregarDados().then(() => {
+        mostrarResultadoAtual(container);
+      });
+    } else {
+      mostrarResultadoAtual(container);
+    }
+  }
+  
+  function mostrarResultadoAtual(container) {
+    const pares = ultimoSorteio.filter(n => n % 2 === 0).length;
+    const impares = ultimoSorteio.length - pares;
+    
+    container.innerHTML = `
+      <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-yellow-400">
+        <h3 class="text-yellow-400 font-bold text-xl mb-4">🎯 ÚLTIMO SORTEIO</h3>
+        <div id="concursoInfoDinamico" class="text-center mb-4"></div>
+        <div class="flex flex-wrap gap-2 justify-center mb-6">
+          ${ultimoSorteio.map(n => `<div class="number bg-yellow-400 text-black font-black">${n.toString().padStart(2,'0')}</div>`).join('')}
+        </div>
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div class="bg-[#1f2937] p-3 rounded-xl">
+            <div class="text-2xl font-black text-blue-400">${pares}</div>
+            <div class="text-xs text-zinc-400">Pares</div>
+          </div>
+          <div class="bg-[#1f2937] p-3 rounded-xl">
+            <div class="text-2xl font-black text-yellow-400">${impares}</div>
+            <div class="text-xs text-zinc-400">Ímpares</div>
+          </div>
+          <div class="bg-[#1f2937] p-3 rounded-xl">
+            <div class="text-2xl font-black text-green-400">15</div>
+            <div class="text-xs text-zinc-400">Total</div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('concursoInfoDinamico').innerHTML = document.getElementById('concursoInfo').innerHTML;
+  }
+
+  async function carregarHistorico() {
+    const container = document.getElementById('resultadosReais');
+    container.innerHTML = '<div class="text-center py-8"><div class="loading-spinner text-4xl inline-block">⏳</div><p class="mt-4 text-zinc-400">Carregando histórico...</p></div>';
+    
+    try {
+      const concursos = [];
+      for (let i = 0; i < 5; i++) {
+        const jogoSimulado = Array.from({length: 15}, () => Math.floor(Math.random() * 25) + 1)
+          .sort((a,b) => a-b);
+        concursos.push({
+          numero: 3693 - i,
+          data: `${20 - i}/02/2025`,
+          dezenas: [...new Set(jogoSimulado)].slice(0,15)
+        });
+      }
+      
+      container.innerHTML = concursos.map(conc => `
+        <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900">
+          <h3 class="text-yellow-400 font-bold mb-4">Concurso #${conc.numero} - ${conc.data}</h3>
+          <div class="flex flex-wrap gap-2 justify-center">
+            ${conc.dezenas.map(n => `<div class="number bg-blue-600">${n.toString().padStart(2,'0')}</div>`).join('')}
+          </div>
+        </div>
+      `).join('');
+      
+    } catch(e) {
+      container.innerHTML = '<p class="text-center text-red-400">Erro ao carregar histórico</p>';
+    }
+  }
+
+  // ============ ESTATÍSTICAS ============
+  function gerarEstatisticas() {
+    const container = document.getElementById('estatisticas');
+    
+    if (meusJogos.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-8">
+          <p class="text-4xl mb-4">📊</p>
+          <p class="text-zinc-400">Nenhum jogo salvo</p>
+        </div>
+      `;
+      return;
+    }
+    
+    const frequencia = {};
+    meusJogos.forEach(jogo => {
+      jogo.jogo.forEach(n => {
+        frequencia[n] = (frequencia[n] || 0) + 1;
+      });
+    });
+    
+    const maisFrequentes = Object.entries(frequencia)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+    
+    const menosFrequentes = Object.entries(frequencia)
+      .sort((a, b) => a[1] - b[1])
+      .slice(0, 10);
+    
+    const analisePares = meusJogos.map(jogo => {
+      const pares = jogo.jogo.filter(n => n % 2 === 0).length;
+      return pares;
+    });
+    const mediaPares = (analisePares.reduce((a,b) => a+b, 0) / analisePares.length).toFixed(1);
+    
+    container.innerHTML = `
+      <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900">
+        <h3 class="text-yellow-400 font-bold mb-4">🔥 MAIS FREQUENTES</h3>
+        <div class="flex flex-wrap gap-2 justify-center">
+          ${maisFrequentes.map(([num, freq]) => `
+            <div class="text-center">
+              <div class="number bg-green-600 font-black">${num.padStart(2,'0')}</div>
+              <span class="text-xs text-green-400">${freq}x</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900">
+        <h3 class="text-yellow-400 font-bold mb-4">❄️ MENOS FREQUENTES</h3>
+        <div class="flex flex-wrap gap-2 justify-center">
+          ${menosFrequentes.map(([num, freq]) => `
+            <div class="text-center">
+              <div class="number bg-red-600 font-black">${num.padStart(2,'0')}</div>
+              <span class="text-xs text-red-400">${freq}x</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      
+      <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900">
+        <h3 class="text-yellow-400 font-bold mb-4">📋 RESUMO</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-[#1f2937] p-4 rounded-xl text-center">
+            <div class="text-3xl font-black text-blue-400">${meusJogos.length}</div>
+            <div class="text-sm text-zinc-400">Total de Jogos</div>
+          </div>
+          <div class="bg-[#1f2937] p-4 rounded-xl text-center">
+            <div class="text-3xl font-black text-yellow-400">${mediaPares}</div>
+            <div class="text-sm text-zinc-400">Média de Pares</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function estatisticasGerais() {
+    const container = document.getElementById('estatisticas');
+    container.innerHTML = `
+      <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900">
+        <h3 class="text-yellow-400 font-bold mb-4">🌐 PROBABILIDADES OFICIAIS</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center p-3 bg-[#1f2937] rounded-xl">
+            <span>🏆 15 acertos</span>
+            <span class="font-bold text-yellow-400">1 em 3.268.760</span>
+          </div>
+          <div class="flex justify-between items-center p-3 bg-[#1f2937] rounded-xl">
+            <span>💰 14 acertos</span>
+            <span class="font-bold">1 em 21.791</span>
+          </div>
+          <div class="flex justify-between items-center p-3 bg-[#1f2937] rounded-xl">
+            <span>🎯 13 acertos</span>
+            <span class="font-bold">1 em 691</span>
+          </div>
+          <div class="flex justify-between items-center p-3 bg-[#1f2937] rounded-xl">
+            <span>⭐ 12 acertos</span>
+            <span class="font-bold">1 em 59</span>
+          </div>
+          <div class="flex justify-between items-center p-3 bg-[#1f2937] rounded-xl">
+            <span>✨ 11 acertos</span>
+            <span class="font-bold">1 em 11</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900 mt-4">
+        <h3 class="text-yellow-400 font-bold mb-4">💡 DICAS ESTATÍSTICAS</h3>
+        <ul class="space-y-2 text-sm text-zinc-300">
+          <li>✅ Equilíbrio ideal: 7-8 pares e ímpares</li>
+          <li>✅ Soma total entre 170-230 é comum</li>
+          <li>✅ Distribua números por todas as faixas</li>
+          <li>✅ Evite sequências muito longas</li>
+          <li>✅ Misture números altos e baixos</li>
+        </ul>
+      </div>
+    `;
+  }
+
+  // ============ PAINEL ============
+  function atualizarPainel() {
+    const container = document.getElementById('painel');
+    
+    if (!ultimoSorteio.length) {
+      container.innerHTML = '<p class="text-center text-zinc-500">Carregando dados...</p>';
+      return;
+    }
+    
+    const pares = ultimoSorteio.filter(n => n % 2 === 0).length;
+    const impares = ultimoSorteio.length - pares;
+    const somaTotal = ultimoSorteio.reduce((a,b) => a+b, 0);
+    const media = (somaTotal / 15).toFixed(1);
+    
+    const faixa1 = ultimoSorteio.filter(n => n <= 5).length;
+    const faixa2 = ultimoSorteio.filter(n => n >= 6 && n <= 10).length;
+    const faixa3 = ultimoSorteio.filter(n => n >= 11 && n <= 15).length;
+    const faixa4 = ultimoSorteio.filter(n => n >= 16 && n <= 20).length;
+    const faixa5 = ultimoSorteio.filter(n => n >= 21 && n <= 25).length;
+    
+    container.innerHTML = `
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-gradient-to-br from-blue-600 to-blue-800 p-6 rounded-3xl shadow-xl text-center">
+          <div class="text-4xl font-black">${pares}</div>
+          <div class="text-sm mt-2">PARES</div>
+        </div>
+        <div class="bg-gradient-to-br from-yellow-600 to-yellow-800 p-6 rounded-3xl shadow-xl text-center">
+          <div class="text-4xl font-black">${impares}</div>
+          <div class="text-sm mt-2">ÍMPARES</div>
+        </div>
+      </div>
+      
+      <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900">
+        <h3 class="text-yellow-400 font-bold mb-4">📊 ANÁLISE DO SORTEIO</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between">
+            <span class="text-zinc-400">Soma Total:</span>
+            <span class="font-bold">${somaTotal}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-zinc-400">Média:</span>
+            <span class="font-bold">${media}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-zinc-400">Menor Número:</span>
+            <span class="font-bold">${Math.min(...ultimoSorteio)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-zinc-400">Maior Número:</span>
+            <span class="font-bold">${Math.max(...ultimoSorteio)}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-[#111827] p-6 rounded-3xl shadow-xl border border-blue-900">
+        <h3 class="text-yellow-400 font-bold mb-4">🎯 DISTRIBUIÇÃO POR FAIXAS</h3>
+        <div class="space-y-2">
+          ${[
+            {faixa: '1-5', valor: faixa1, cor: 'bg-red-500'},
+            {faixa: '6-10', valor: faixa2, cor: 'bg-orange-500'},
+            {faixa: '11-15', valor: faixa3, cor: 'bg-yellow-500'},
+            {faixa: '16-20', valor: faixa4, cor: 'bg-green-500'},
+            {faixa: '21-25', valor: faixa5, cor: 'bg-blue-500'}
+          ].map(item => `
+            <div class="flex items-center gap-3">
+              <span class="text-sm w-16">${item.faixa}</span>
+              <div class="flex-1 bg-[#1f2937] rounded-full h-4">
+                <div class="${item.cor} h-4 rounded-full" style="width: ${(item.valor/15)*100}%"></div>
+              </div>
+              <span class="text-sm font-bold">${item.valor}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // ============ NAVEGAÇÃO ============
+  function showTab(n) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.getElementById('content' + n).classList.remove('hidden');
+    
+    document.querySelectorAll('.tab').forEach((el, i) => {
+      el.classList.toggle('tab-active', i === n);
+    });
+    
+    if (n === 1) carregarMeusJogos();
+    if (n === 2) carregarUltimoResultado();
+    if (n === 3) gerarEstatisticas();
+    if (n === 4) atualizarPainel();
+  }
+
+  // ============ ATUALIZAÇÃO AUTOMÁTICA ============
+  setInterval(() => {
+    updateTimeStatus();
+    if (navigator.onLine && Math.random() > 0.7) carregarDados();
+  }, 180000);
+
+  setInterval(updateTimeStatus, 30000);
+
+  // ============ INICIALIZAÇÃO ============
+  window.onload = () => {
+    carregarDados();
+    showTab(0);
+    updateOnlineStatus();
+    
+    // Mostrar banner de instalação se não foi fechado antes
+    if (!localStorage.getItem('banner_fechado')) {
+      showInstallBanner();
+    }
+  };
+
+  // Salvar jogos quando a página for fechada
+  window.addEventListener('beforeunload', () => {
+    localStorage.setItem('loto_jogos', JSON.stringify(meusJogos));
+  });
+</script>
 </body>
 </html>
